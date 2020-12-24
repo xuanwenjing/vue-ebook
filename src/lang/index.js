@@ -11,7 +11,7 @@ const messages = {
 };
 let locale = localStorage.getLocale();
 if (!locale) {
-  locale = 'en';
+  locale = 'cn';
   localStorage.saveLocale(locale);
 }
 const i18n = new VueI18N({

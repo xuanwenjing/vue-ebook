@@ -20,15 +20,26 @@
 
 <script>
 import { ebookMixin } from '../../utils/mixin';
-import localStorage from '../../utils/localStorage';
+// import localStorage from '../../utils/localStorage';
 export default {
   mixins: [ebookMixin],
   computed: {
+    // getSectionName() {
+    //   if (this.section) {
+    //     const sectionInfo = this.currentBook.section(this.section);
+    //     if (sectionInfo && sectionInfo.href && this.currentBook && this.currentBook.navigation) {
+    //       return this.currentBook.navigation.get(sectionInfo.href).label;
+    //     }
+    //   }
+    //   return '';
+    // }
+
     getSectionName() {
       if (this.section) {
-        const sectionInfo = this.currentBook.section(this.section);
-        if (sectionInfo && sectionInfo.href) {
-          return this.currentBook.navigation.get(sectionInfo.href).label;
+        const section = this.currentBook.section(this.section);
+        if (section && section.href && this.currentBook && this.currentBook.navigation) {
+          // return this.currentBook.navigation.get(section.href).label
+          return this.navigation[this.section].label;
         }
       }
       return '';
@@ -46,18 +57,12 @@ export default {
         this.progress / 100 > 0
           ? this.currentBook.locations.cfiFromPercentage(this.progress / 100)
           : 0;
-      // this.currentBook.rendition.display(location).then(() => {
-      //   this.refreshLocation();
-      // });
       this.display(location);
     },
     onProgressInput(progress) {
       this.setProgress(progress).then(() => {
         this.updateProgressBg();
       });
-      // .then(() => {
-      //   this.displayProgress();
-      // });
     },
     prevSection() {
       if (this.section > 0 && this.bookAvailable) {
@@ -76,20 +81,11 @@ export default {
     displaySection() {
       const sectionInfo = this.currentBook.section(this.section);
       if (sectionInfo && sectionInfo.href) {
-        // this.currentBook.rendition.display(sectionInfo.href).then(() => {
-        //   this.refreshLocation();
-        //   this.updateProgressBg();
-        // });
         this.display(sectionInfo.href);
       }
     },
     updateProgressBg() {
       this.$refs.progress.style.backgroundSize = `${this.progress}% 100%`;
-    },
-    getReadTimeText() {
-      let readTime = localStorage.getReadTime(this.flieName);
-      readTime = readTime ? Math.floor(readTime / 60) + 1 : 1;
-      return this.$t('book.haveRead').replace('$1', readTime);
     }
   },
   updated() {

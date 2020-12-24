@@ -22,9 +22,22 @@ $ratio: 375/10;
   color: #333;
   font-size: px2rem(20);
 }
-
+.selected {
+  // font-size: px2rem(20);
+  font-weight: bold;
+}
 @mixin ellipsis() {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+}
+
+@mixin ellipsis2($line) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $line;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: keep-all;
 }

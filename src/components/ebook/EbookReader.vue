@@ -1,6 +1,7 @@
 <template>
   <div class="ebook-reader">
     <div id="read"></div>
+    <div class="ebook-reader-mask" @click="onMaskClick" @touchend="touchend" @touchmove="move"></div>
   </div>
 </template>
 
@@ -9,6 +10,7 @@
 import { ebookMixin } from '../../utils/mixin';
 import localStorage from '../../utils/localStorage';
 import Epub from 'epubjs';
+import { flatten } from '../../utils/book';
 global.ePub = Epub;
 export default {
   mixins: [ebookMixin],
@@ -20,6 +22,29 @@ export default {
     });
   },
   methods: {
+    touchend(e) {
+      this.firstTouchY = null;
+      this.setOffsetY(0);
+    },
+    move(e) {
+      let offsetY = 0;
+      if (this.firstTouchY) {
+        offsetY = e.targetTouches[0].clientY - this.firstTouchY;
+      } else {
+        this.firstTouchY = e.targetTouches[0].clientY;
+      }
+      this.setOffsetY(offsetY);
+    },
+    onMaskClick(e) {
+      const winWidth = window.innerWidth;
+      if (e.offsetX > 0 && e.offsetX < winWidth * 0.3) {
+        this.prevPage();
+      } else if (e.offsetX > 0 && e.offsetX > winWidth * 0.7) {
+        this.nextPage();
+      } else {
+        this.toggleTitleAndMenu();
+      }
+    },
     prevPage() {
       if (this.rendition) {
         this.rendition.prev().then(() => {
@@ -42,10 +67,31 @@ export default {
       this.setSettingVisible(-1);
       this.setFontFamilyVisible(false);
     },
-    toggleTitleAndMenu() {
-      this.setMenuVisible(!this.menuVisible);
-      this.setSettingVisible(-1);
-      this.setFontFamilyVisible(false);
+
+    parseBookInfo() {
+      // 获取封面
+      this.book.loaded.cover.then(cover => {
+        this.book.archive.createUrl(cover).then(url => {
+          this.setCover(url);
+        });
+      });
+      // 获取标题作者信息
+      this.book.loaded.metadata.then(metadata => {
+        this.setMetadata(metadata);
+      });
+      // 获取目录信息（将树状目录转为1维数组）
+      this.book.loaded.navigation.then(nav => {
+        const navigation = flatten(nav.toc);
+        function find(item, level = 0) {
+          return !item.parent
+            ? level
+            : find(navigation.filter(parentItem => parentItem.id === item.parent)[0], ++level);
+        }
+        navigation.forEach(item => {
+          item.level = find(item);
+        });
+        this.setNavigation(navigation);
+      });
     },
 
     initThemes() {
@@ -132,6 +178,8 @@ export default {
         ]).then(() => {});
       });
 
+      // 解析书本信息
+      this.parseBookInfo();
       // 分页算法
       this.book.ready
         .then(() => {
@@ -150,9 +198,19 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../assets/styles/global';
-.book-reader {
+.ebook-reader {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  position: relative;
+  .ebook-reader-mask {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
 }
 </style>

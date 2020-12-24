@@ -75,27 +75,49 @@ export const ebookMixin = {
     },
     refreshLocation() {
       const currentLocation = this.currentBook.rendition.currentLocation(); // 获取当前展示页面的定位
-      this.setSection(currentLocation.start.index); // 设置当前页面的章节
-      const startCfi = currentLocation.start.cfi;
-      const progress = this.currentBook.locations.percentageFromCfi(startCfi);
-      console.log(progress);
+      if (currentLocation && currentLocation.start) {
+        this.setSection(currentLocation.start.index); // 设置当前页面的章节
+        const startCfi = currentLocation.start.cfi;
+        const progress = this.currentBook.locations.percentageFromCfi(startCfi);
 
-      this.setProgress(Math.floor(progress * 100));
-      // this.updateProgressBg();
-      localStorage.saveLocation(this.fileName, startCfi);
+        this.setProgress(Math.floor(progress * 100));
+        // this.updateProgressBg();
+        localStorage.saveLocation(this.fileName, startCfi);
+        const bookmark = localStorage.getBookmark(this.fileName);
+        if (bookmark) {
+          if (bookmark.some(item => item.cfi === startCfi)) {
+            this.setIsBookmark(true);
+          } else {
+            this.setIsBookmark(false);
+          }
+        } else {
+          this.setIsBookmark(false);
+        }
+      }
+    },
+    toggleTitleAndMenu() {
+      this.setMenuVisible(!this.menuVisible);
+      this.setSettingVisible(-1);
+      this.setFontFamilyVisible(false);
     },
     display(target, cb) {
       if (target) {
-        return this.currentBook.rendition.display(target).then(() => {
+        this.currentBook.rendition.display(target).then(() => {
           this.refreshLocation();
           if (cb) cb();
         });
       } else {
-        return this.currentBook.rendition.display().then(() => {
+        this.currentBook.rendition.display().then(() => {
           this.refreshLocation();
           if (cb) cb();
         });
       }
+    },
+    getReadTimeText() {
+      let readTime = localStorage.getReadTime(this.fileName);
+
+      readTime = readTime ? Math.floor(readTime / 60) + 1 : 1;
+      return this.$t('book.haveRead').replace('$1', readTime);
     }
   }
 };
