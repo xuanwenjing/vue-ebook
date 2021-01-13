@@ -19,8 +19,10 @@
 .slide-right-enter-active,
 .slide-right-leave-active,
 .fade-right-enter-active,
-.fade-right-leave-active {
-  transition: all 0.3s linear;
+.fade-right-leave-active,
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.2s linear;
 }
 
 .slide-up-enter,
@@ -59,5 +61,49 @@
 .fade-right-enter-to,
 .fade-right-leave {
   transform: translate(0, 0);
+  opacity: 1;
+}
+
+.title-down-enter,
+.title-down-leave-to {
+  opacity: 1;
+  transform: translate(0, px2rem(10));
+}
+
+.title-down-leave,
+.title-down-enter-to {
+  opacity: 0;
+  transform: translate(0, 0);
+}
+
+.title-down-enter-active,
+.title-down-leave-active {
+  transition: all 0.2s linear;
+}
+
+.hotList-up-enter,
+.hotList-up-leave-to {
+  opacity: 0;
+  transform: translate(0, px2rem(40));
+}
+
+.hotList-up-leave,
+.hotList-up-enter-to {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+.hotList-up-enter-active,
+.hotList-up-leave-active {
+  transition: all 0.2s linear;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave {
   opacity: 1;
 }

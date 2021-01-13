@@ -6,7 +6,7 @@
         <div class="select-wrapper" v-for="(item,index) in fontSizeList" :key="index" @click='setFontSize(item)'>
           <div class="line" :style="{opacity:index===0?0:1}"></div>
           <div class="point-wrapper">
-            <div class="point" v-show="item.fontSize === defaultFontSize">
+            <div class="point" v-show="shouFont(item)">
               <div class="small-point">
               </div>
             </div>
@@ -45,7 +45,15 @@ export default {
     },
     showFontFamilyPopup() {
       this.setFontFamilyVisible(true);
+    },
+    shouFont(item) {
+      // console.log(item);
+      // console.log(this.defaultFontSize);
+      return item.fontSize === this.defaultFontSize;
     }
+  },
+  created() {
+    // console.log(this.defaultFontSize);
   }
 };
 </script>

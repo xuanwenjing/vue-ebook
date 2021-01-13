@@ -23,28 +23,6 @@ import { ebookMixin } from '../../utils/mixin';
 // import localStorage from '../../utils/localStorage';
 export default {
   mixins: [ebookMixin],
-  computed: {
-    // getSectionName() {
-    //   if (this.section) {
-    //     const sectionInfo = this.currentBook.section(this.section);
-    //     if (sectionInfo && sectionInfo.href && this.currentBook && this.currentBook.navigation) {
-    //       return this.currentBook.navigation.get(sectionInfo.href).label;
-    //     }
-    //   }
-    //   return '';
-    // }
-
-    getSectionName() {
-      if (this.section) {
-        const section = this.currentBook.section(this.section);
-        if (section && section.href && this.currentBook && this.currentBook.navigation) {
-          // return this.currentBook.navigation.get(section.href).label
-          return this.navigation[this.section].label;
-        }
-      }
-      return '';
-    }
-  },
   methods: {
     onProgressChange(progress) {
       this.setProgress(progress).then(() => {

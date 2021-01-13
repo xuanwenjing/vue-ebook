@@ -1,7 +1,7 @@
 <template>
   <div class="ebook-reader">
     <div id="read"></div>
-    <div class="ebook-reader-mask" @click="onMaskClick" @touchend="touchend" @touchmove="move"></div>
+    <div class="ebook-reader-mask" @click="onMaskClick" @touchend="touchend" @touchmove="move" @mousedown.left="onMouseDown" @mousemove="onMouseMove" @mouseup="onMouseUp"></div>
   </div>
 </template>
 
@@ -11,17 +11,74 @@ import { ebookMixin } from '../../utils/mixin';
 import localStorage from '../../utils/localStorage';
 import Epub from 'epubjs';
 import { flatten } from '../../utils/book';
+import { getLocalForage } from '../../utils/localForage';
 global.ePub = Epub;
 export default {
   mixins: [ebookMixin],
   mounted() {
-    const fileName = this.$route.params.fileName.split('|').join('/') + '.epub';
+    const book = this.$route.params.fileName.split('|');
+    const fileName = book[1];
 
-    this.setFileName(fileName).then(() => {
-      this.initEpub();
+    getLocalForage(fileName, (err, blob) => {
+      if (!err && blob) {
+        // console.log('找到离线电子书');
+        this.setFileName(book.join('/')).then(() => {
+          this.initEpub(blob);
+        });
+      } else {
+        // console.log('在线获取电子书');
+        const baseUrl = `${process.env.VUE_APP_EPUB_URL}/`;
+        const url = baseUrl + book.join('/') + '.epub';
+        this.setFileName(book.join('/')).then(() => {
+          this.initEpub(url);
+        });
+      }
     });
   },
   methods: {
+    // 1 点击了
+    // 2 点击之后移动了
+    // 3 点击了未移动就松手
+    // 4 点击了移动后松手
+    onMouseDown(e) {
+      if (!this.menuVisible) {
+        this.mouseState = 1;
+        this.mouseStartTime = e.timeStamp;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    onMouseMove(e) {
+      if (this.mouseState === 1) {
+        this.mouseState = 2;
+      } else if (this.mouseState === 2) {
+        let offsetY = 0;
+        if (this.firstTouchY) {
+          offsetY = e.clientY - this.firstTouchY;
+        } else {
+          this.firstTouchY = e.clientY;
+        }
+        this.setOffsetY(offsetY);
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    onMouseUp(e) {
+      const time = e.timeStamp - this.mouseStartTime;
+      if (this.mouseState === 1) {
+        this.mouseState = 3;
+      } else if (this.mouseState === 2) {
+        this.mouseState = 4;
+        this.setOffsetY(0);
+        this.firstTouchY = null;
+      }
+      if (time < 100) {
+        this.mouseState = 3;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    },
     touchend(e) {
       this.firstTouchY = null;
       this.setOffsetY(0);
@@ -34,8 +91,13 @@ export default {
         this.firstTouchY = e.targetTouches[0].clientY;
       }
       this.setOffsetY(offsetY);
+      e.preventDefault();
+      e.stopPropagation();
     },
     onMaskClick(e) {
+      if (this.mouseState && this.mouseState === 4) {
+        return;
+      }
       const winWidth = window.innerWidth;
       if (e.offsetX > 0 && e.offsetX < winWidth * 0.3) {
         this.prevPage();
@@ -100,8 +162,10 @@ export default {
         const fontSize = localStorage.getFontSize(this.fileName);
         if (fontSize) {
           this.rendition.themes.fontSize(fontSize);
+          // console.log('fontSIZE1:', this.defaultFontSize);
           this.setDefaultFontSize(fontSize);
         } else {
+          // console.log('fontSIZE:', this.defaultFontSize);
           localStorage.saveFontSize(this.fileName, this.defaultFontSize);
         }
         // 初始化字体样式
@@ -110,10 +174,11 @@ export default {
           this.rendition.themes.font(fontFamily);
           this.setDefaultFontFamily(fontFamily);
         } else {
-          localStorage.saveFontSize(this.fileName, this.defaultFontFamily);
+          localStorage.saveFontFamily(this.fileName, this.defaultFontFamily);
         }
 
         // 初始化主题
+
         this.themeList.forEach(theme => {
           this.rendition.themes.register(theme.name, theme.style);
         });
@@ -122,6 +187,7 @@ export default {
           this.rendition.themes.select(theme);
           this.setDefaultTheme(theme);
         } else {
+          this.rendition.themes.select(this.defaultTheme);
           localStorage.saveTheme(this.fileName, this.defaultTheme);
         }
 
@@ -132,15 +198,13 @@ export default {
         // this.refreshLocation();
       }
     },
-    initEpub() {
-      const baseUrl = `${process.env.VUE_APP_RES_URL}/epub/`;
-      const url = baseUrl + this.fileName;
+    initEpub(url) {
       this.book = new Epub(url);
       this.setCurrentBook(this.book);
       this.rendition = this.book.renderTo('read', {
         width: innerWidth,
         height: innerHeight,
-        method: 'default'
+        method: 'default' // 如果不加，在微信端显示不成功
       });
       const location = localStorage.getLocation(this.fileName);
       this.display(location, () => {
@@ -187,7 +251,30 @@ export default {
             750 * (window.innerWidth / 375) * (localStorage.getFontSize(this.fileName) / 16)
           );
         })
-        .then(() => {
+        .then(locations => {
+          this.navigation.forEach(nav => {
+            nav.pageList = [];
+          });
+
+          locations.forEach(item => {
+            const page = item.match(/\[(.*)\]!/)[1];
+            this.navigation.forEach(nav => {
+              const currentChapter = nav.href.match(/^(.*)\.x?html$/)[1];
+              if (currentChapter && currentChapter === page) {
+                nav.pageList.push(page);
+              }
+            });
+          });
+          let curLength = 1;
+          this.navigation.forEach(nav => {
+            if (curLength === 0) {
+              nav.page = 1;
+            } else {
+              nav.page = curLength;
+            }
+            curLength += nav.pageList.length + 1;
+          });
+          this.setPagelist(locations);
           this.setBookAvailable(true);
           this.refreshLocation();
         });

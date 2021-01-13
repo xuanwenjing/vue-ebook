@@ -1,9 +1,11 @@
 <template>
   <div class="ebook" ref="ebook">
+    <ebook-header></ebook-header>
     <ebook-title></ebook-title>
     <ebook-reader></ebook-reader>
     <ebook-menu></ebook-menu>
     <ebook-bookmark></ebook-bookmark>
+    <ebook-footer></ebook-footer>
   </div>
 </template>
 
@@ -11,6 +13,8 @@
 import EbookReader from '../../components/ebook/EbookReader';
 import EbookTitle from '../../components/ebook/EbookTitle';
 import EbookMenu from '../../components/ebook/EbookMenu';
+import EbookHeader from '../../components/ebook/EbookHeader';
+import EbookFooter from '../../components/ebook/EbookFooter';
 import localStorage from '../../utils/localStorage';
 import { ebookMixin } from '../../utils/mixin';
 import { setInterval, setTimeout } from 'timers';
@@ -21,7 +25,9 @@ export default {
     EbookReader,
     EbookTitle,
     EbookMenu,
-    EbookBookmark
+    EbookBookmark,
+    EbookHeader,
+    EbookFooter
   },
   watch: {
     offsetY(v) {

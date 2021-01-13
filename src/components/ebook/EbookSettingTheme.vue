@@ -3,7 +3,7 @@
     <div class="setting-wrapper" v-show="settingVisible===3">
       <div class="setting-theme-wrapper">
         <div class="setting-theme-item" v-for="(item,index) in themeList" :key="index" @click='selectTheme(item)'>
-          <div class="item-color" :class="{active:defaultTheme === item.name}" :style="item.style.body"></div>
+          <div class="item-color" :class="{active:defaultTheme === item.name}" :style="{color:item.style.body.color,background:item.style.body.background}"></div>
           <div class="item-text" :class="{active:defaultTheme === item.name}">{{item.alias}}</div>
         </div>
       </div>
@@ -19,8 +19,6 @@ export default {
   mixins: [ebookMixin],
   methods: {
     selectTheme(item) {
-      console.log(item.name);
-
       this.setDefaultTheme(item.name).then(() => {
         this.currentBook.rendition.themes.select(item.name);
       });

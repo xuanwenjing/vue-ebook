@@ -1,7 +1,102 @@
 import { mapGetters, mapActions } from 'vuex';
 import { themeList, addCSS, removeAllCSS } from './book';
 import localStorage from './localStorage';
+import {
+  gotoBookDetail,
+  appendAddToShelf,
+  refreshAllShelfId
+} from '../utils/store';
+import { shelf } from '../api/store';
 
+export const storeShelfMixin = {
+  computed: {
+    ...mapGetters([
+      'isEditMode',
+      'shelfList',
+      'shelfSelected',
+      'shelfTitleVisible',
+      'offsetY',
+      'isCategory',
+      'categoryData',
+      'categoryName'
+    ])
+  },
+  methods: {
+    ...mapActions([
+      'setIsEditMode',
+      'setShelfList',
+      'setShelfSelected',
+      'setShelfTitleVisible',
+      'setOffsetY',
+      'setIsCategory',
+      'setCategoryData',
+      'setCategoryName'
+    ]),
+    goToStoreHome() {
+      this.$router.push('/store/home');
+    },
+    showBookDetail(item) {
+      gotoBookDetail(this, item);
+    },
+    getShelfList() {
+      let shelfList = localStorage.getBookShelf();
+      if (!shelfList) {
+        shelf().then(response => {
+          if (response.status === 200) {
+            if (response.data && response.data.bookList) {
+              shelfList = appendAddToShelf(response.data.bookList);
+              shelfList = this.refreshShelfListId(shelfList);
+              localStorage.saveBookShelf(shelfList);
+              this.setShelfList(shelfList);
+            }
+          }
+        });
+      } else {
+        this.setShelfList(shelfList);
+      }
+    },
+    clearSelectedList() {
+      while (this.shelfSelected.length) {
+        this.shelfSelected.shift().selected = false;
+      }
+    },
+    refreshShelfListId(shelfList) {
+      if (!shelfList) {
+        shelfList = this.shelfList;
+      }
+      shelfList = refreshAllShelfId(shelfList);
+      return shelfList;
+    }
+  }
+};
+
+export const storeHomeMixin = {
+  computed: {
+    ...mapGetters([
+      'offsetY',
+      'hotSearchOffsetY',
+      'flapCardVisible',
+      'isEditMode'
+    ])
+  },
+  methods: {
+    ...mapActions([
+      'setOffsetY',
+      'setHotSearchOffsetY',
+      'setFlapCardVisible',
+      'setIsEditMode'
+    ]),
+    showBookDetail([item, vue]) {
+      vue.$router.push({
+        path: '/store/detail',
+        query: {
+          fileName: item.fileName,
+          category: item.category
+        }
+      });
+    }
+  }
+};
 export const ebookMixin = {
   computed: {
     ...mapGetters([
@@ -28,6 +123,21 @@ export const ebookMixin = {
     ]),
     themeList() {
       return themeList(this);
+    },
+    getSectionName() {
+      if (this.section) {
+        const section = this.currentBook.section(this.section);
+        if (
+          section &&
+          section.href &&
+          this.currentBook &&
+          this.currentBook.navigation
+        ) {
+          // return this.currentBook.navigation.get(section.href).label
+          return this.navigation[this.section].label;
+        }
+      }
+      return '';
     }
   },
   methods: {
@@ -92,6 +202,13 @@ export const ebookMixin = {
           }
         } else {
           this.setIsBookmark(false);
+        }
+        if (this.pagelist) {
+          this.setPaginate(
+            `${currentLocation.start.location} / ${this.pagelist.length}`
+          );
+        } else {
+          this.setPaginate('');
         }
       }
     },

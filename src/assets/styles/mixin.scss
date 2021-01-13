@@ -1,3 +1,5 @@
+$animationTime: 0.2s;
+$animationType: linear;
 $ratio: 375/10;
 @function px2rem($px) {
   @return $px / $ratio + rem;
@@ -25,6 +27,12 @@ $ratio: 375/10;
 .selected {
   // font-size: px2rem(20);
   font-weight: bold;
+  color: rgb(0, 140, 255);
+}
+
+.title {
+  font-size: px2rem(16);
+  font-weight: bold;
 }
 @mixin ellipsis() {
   text-overflow: ellipsis;
@@ -40,4 +48,13 @@ $ratio: 375/10;
   overflow: hidden;
   text-overflow: ellipsis;
   word-break: keep-all;
+}
+
+@mixin absCenter() {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
 }

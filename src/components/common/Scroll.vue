@@ -39,6 +39,8 @@ export default {
       this.$emit('onScroll', offsetY);
     },
     scrollTo(x, y) {
+      // console.log(y);
+
       this.$refs.scrollWrapper.scrollTo(x, y);
     },
     refresh() {
@@ -65,7 +67,6 @@ export default {
 
 .scroll-wrapper {
   position: relative;
-  z-index: 100;
   width: 100%;
   overflow-x: hidden;
   overflow-y: scroll;

@@ -58,6 +58,33 @@ const actions = {
   },
   setSpeakingIconBottom({ commit }, speakingIconBottom) {
     commit('SET_SPEAKING_ICON_BOTTOM', speakingIconBottom);
+  },
+  setHotSearchOffsetY({ commit }, hotSearchOffsetY) {
+    commit('SET_HOT_SEARCH_OFFSETY', hotSearchOffsetY);
+  },
+  setFlapCardVisible({ commit }, flapCardVisible) {
+    commit('SET_FLAP_CARD_VISIBLE', flapCardVisible);
+  },
+  setIsEditMode({ commit }, isEditMode) {
+    commit('SET_IS_EDIT_MODE', isEditMode);
+  },
+  setShelfList({ commit }, shelfList) {
+    commit('SET_SHELF_LIST', shelfList);
+  },
+  setShelfSelected({ commit }, shelfSelected) {
+    commit('SET_SHELF_SELECTED', shelfSelected);
+  },
+  setShelfTitleVisible({ commit }, shelfTitleVisible) {
+    commit('SET_SHELF_TITLE_VISIBLE', shelfTitleVisible);
+  },
+  setIsCategory({ commit }, isCategory) {
+    commit('SET_IS_CATEGORY', isCategory);
+  },
+  setCategoryData({ commit }, categoryData) {
+    commit('SET_CATEGORY_DATA', categoryData);
+  },
+  setCategoryName({ commit }, categoryName) {
+    commit('SET_CATEGORY_NAME', categoryName);
   }
 };
 export default actions;

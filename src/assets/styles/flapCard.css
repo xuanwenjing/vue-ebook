@@ -1,0 +1,13 @@
+.icon {
+  color: #333;
+  font-size: 0.53333rem;
+}
+
+.selected {
+  font-weight: bold;
+}
+
+.title {
+  font-size: 0.42667rem;
+  font-weight: bold;
+}

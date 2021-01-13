@@ -61,6 +61,9 @@ export default {
       }
     },
     offsetY(v) {
+      if (this.menuVisible) {
+        return;
+      }
       if (v >= this.height && v <= this.threshold) {
         // 状态2
         this.beforeThreshold(v);

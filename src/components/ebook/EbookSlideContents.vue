@@ -23,7 +23,7 @@
     <scroll class="contents-lists-wrapper" :top="156" :bottom="48" ref="scroll" v-show="!searchVisible">
       <div class="contents-list" v-for="(item,index) in navigation" :key="index" :class="{'selected':section === index}" @click="selectSection(item)">
         <span class="content-list-item-label" :style="contentItemStyle(item)">{{item.label}}</span>
-        <span class="content-list-item-page">1</span>
+        <span class="content-list-item-page">{{item.page}}</span>
       </div>
     </scroll>
 

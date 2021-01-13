@@ -14,6 +14,12 @@ const lStorage = {
   clearLocalStorage() {
     return lS.clear();
   },
+  saveBookShelf(shelf) {
+    this.setLocalStorage('shelf', shelf);
+  },
+  getBookShelf() {
+    return this.getLocalStorage('shelf');
+  },
   setBookObject(fileName, key, value) {
     let bookInfo = this.getLocalStorage(`${fileName}-info`);
     if (!bookInfo) {
